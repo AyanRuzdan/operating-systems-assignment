@@ -8,7 +8,7 @@ The file containing the information on the processes will have each process on a
 
 Each line will have a process name that will be a string.
 
-Followung the name will be the arrival time of the process. The arrival time will be in reference to the previous process.
+Following the name will be the arrival time of the process. The arrival time will be in reference to the previous process.
 
 Following this will be the total execution time.
 
