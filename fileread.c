@@ -1,97 +1,102 @@
 #include <stdio.h>
 #include <stdlib.h>
-#define MAX_SIZE 100
+
+#define MAX_PROCESSES 100
+
 struct process
 {
-    int pid;
+    char id[50];
     int arrival_time;
     int burst_time;
     int remaining_time;
-    int completed;
-    int completion_time;
-    int waiting_time;
     int turnaround_time;
+    int waiting_time;
 };
+
 int main()
 {
-    char filename[50];
-    char p_id[MAX_SIZE][50];
-    int at[MAX_SIZE];
-    int bt[MAX_SIZE];
-    // printf("Enter file name: ");
-    // scanf("%s", filename);
-    // FILE *fp = fopen(filename, "r");
-    FILE *fp = fopen("processes.txt", "r");
-    if (!fp)
+    FILE *input_file;
+    struct process processes[MAX_PROCESSES];
+    int num_processes = 0, time_slice = 0;
+    float avg_turnaround_time = 0.0, avg_waiting_time = 0.0;
+    int i, j, time = 0, completed = 0, shortest;
+
+    // Open the input file for reading
+    input_file = fopen("proc1.txt", "r");
+
+    if (input_file == NULL)
     {
-        printf("Failed to open file!!!\n");
+        printf("Error opening input file\n");
         return 1;
     }
-    int time_slice;
-    printf("Enter time slice: ");
-    scanf("%d", &time_slice);
-    int count = 0;
-    while (fscanf(fp, "%s %d %d", p_id[count], &at[count], &bt[count]) == 3)
-        count++;
-    struct process *processes = malloc(count * sizeof(struct process));
-    for (int i = 0; i < count; i++)
+
+    // Read the process data from the file
+    while (fscanf(input_file, "%s %d %d", processes[num_processes].id,
+                  &processes[num_processes].burst_time, &processes[num_processes].arrival_time) != EOF)
     {
-        fscanf(filename, "%s %d %d", processes[i].pid, &processes[i].arrival_time, &processes[i].burst_time);
-        processes[i].remaining_time = processes[i].burst_time;
-        processes[i].completed = 0;
-        processes[i].completion_time = 0;
-        processes[i].waiting_time = 0;
-        processes[i].turnaround_time = 0;
+        processes[num_processes].remaining_time = processes[num_processes].burst_time;
+        num_processes++;
     }
-    fclose(filename);
-    int current_time = 0;
-    int completed = 0;
-    int time_slice_remaining = 0;
-    while (completed < count)
+
+    // Read the time slice from the file
+    // fscanf(input_file, "%d", &time_slice);
+    // Read the time slice from the file
+    printf("Time slice: ");
+    scanf("%d", &time_slice);
+
+    fclose(input_file);
+
+    // Run the SRTF algorithm
+    while (completed < num_processes)
     {
-        int shortest_process_index = -1;
-        int shortest_remaining_time = __INT_MAX__;
-        for (int i = 0; i < count; i++)
+        shortest = -1;
+        for (i = 0; i < num_processes; i++)
         {
-            if (!processes[i].completed && processes[i].arrival_time <= current_time && processes[i].remaining_time < shortest_remaining_time)
+            if (processes[i].arrival_time <= time && processes[i].remaining_time > 0)
             {
-                shortest_process_index = i;
-                shortest_remaining_time = processes[i].remaining_time;
+                if (shortest == -1 || processes[i].remaining_time < processes[shortest].remaining_time)
+                {
+                    shortest = i;
+                }
             }
         }
-        struct process *p = &processes[shortest_process_index];
-        if (p->remaining_time > time_slice)
+        if (shortest == -1)
         {
-            p->remaining_time -= time_slice;
-            time_slice_remaining = time_slice;
+            time++;
         }
         else
         {
-            time_slice_remaining = p->remaining_time;
-            p->remaining_time = 0;
-            p->completed = 1;
-            p->completion_time = current_time + time_slice_remaining;
-            p->waiting_time = p->waiting_time - p->arrival_time - p->burst_time;
-            p->turnaround_time = p->completion_time - p->arrival_time;
-            completed++;
+            if (processes[shortest].remaining_time <= time_slice)
+            {
+                time += processes[shortest].remaining_time;
+                processes[shortest].remaining_time = 0;
+            }
+            else
+            {
+                time += time_slice;
+                processes[shortest].remaining_time -= time_slice;
+            }
+            if (processes[shortest].remaining_time == 0)
+            {
+                completed++;
+                processes[shortest].turnaround_time = time - processes[shortest].arrival_time;
+                processes[shortest].waiting_time = processes[shortest].turnaround_time - processes[shortest].burst_time;
+                avg_turnaround_time += processes[shortest].turnaround_time;
+                avg_waiting_time += processes[shortest].waiting_time;
+            }
         }
-        for (int i = 0; i < count; i++)
-            if (i != shortest_process_index && !processes[i].completed && processes[i].arrival_time <= current_time)
-                processes[i].waiting_time += time_slice_remaining;
+    }
 
-        current_time += time_slice_remaining;
-    }
-    float total_waiting_time = 0.0;
-    float total_turnaround_time = 0.0;
-    for (int i = 0; i < count; i++)
+    // Print the results
+    printf("Process\t\tTurnaround Time\n");
+    for (i = 0; i < num_processes; i++)
     {
-        total_waiting_time += processes[i].waiting_time;
-        total_turnaround_time += processes[i].turnaround_time;
+        printf("%s\t\t%d\n", processes[i].id, processes[i].turnaround_time);
     }
-    float avg_waiting_time = total_waiting_time / count;
-    float avg_turnaround_time = total_turnaround_time / count;
-    printf("The average waiting time is: %d\n", avg_waiting_time);
-    printf("The average turnaround time is: %d\n", avg_turnaround_time);
-    fclose(fp);
+    avg_turnaround_time /= num_processes;
+    avg_waiting_time /= num_processes;
+    printf("Average Turnaround Time: %.2f\n", avg_turnaround_time);
+    printf("Average Waiting Time: %.2f\n", avg_waiting_time);
+
     return 0;
 }
