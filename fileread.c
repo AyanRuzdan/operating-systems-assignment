@@ -18,9 +18,10 @@ int main()
     char p_id[MAX_SIZE][50];
     int at[MAX_SIZE];
     int bt[MAX_SIZE];
-    printf("Enter file name: ");
-    scanf("%s", filename);
-    FILE *fp = fopen(filename, "r");
+    // printf("Enter file name: ");
+    // scanf("%s", filename);
+    // FILE *fp = fopen(filename, "r");
+    FILE *fp = fopen("processes.txt", "r");
     if (!fp)
     {
         printf("Failed to open file!!!\n");
@@ -91,5 +92,6 @@ int main()
     float avg_turnaround_time = total_turnaround_time / count;
     printf("The average waiting time is: %d\n", avg_waiting_time);
     printf("The average turnaround time is: %d\n", avg_turnaround_time);
+    fclose(fp);
     return 0;
 }

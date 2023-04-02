@@ -1,4 +1,4 @@
-#include <stdio.h>
+/*#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -143,45 +143,12 @@ int main() {
     free(processes);
 
     return 0;
-}
+}*/
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_SIZE 100
-
-int main() {
-    char names[MAX_SIZE][50];   // array to store names
-    int ages[MAX_SIZE];         // array to store ages
-    int count = 0;              // counter for number of names read
-
-    FILE *fp;                   // file pointer
-    fp = fopen("input.txt", "r");
-
-    // check if file opened successfully
-    if (fp == NULL) {
-        printf("Error opening file.\n");
-        exit(1);
-    }
-
-    // read in names and ages from file
-    while (fscanf(fp, "%s %d", names[count], &ages[count]) == 2) {
-        count++;
-    }
-
-    // print out the names and ages
-    for (int i = 0; i < count; i++) {
-        printf("%s is %d years old.\n", names[i], ages[i]);
-    }
-
-    // close the file
-    fclose(fp);
-
-    return 0;
-}
-#include <stdio.h>
-#include <stdlib.h>
-
-struct process {
+struct process
+{
     int pid;
     int arrival_time;
     int burst_time;
@@ -192,18 +159,21 @@ struct process {
     int turnaround_time;
 };
 
-int main() {
-    FILE *input_file = fopen("input.txt", "r");
-    if (input_file == NULL) {
+int main()
+{
+    FILE *input_file = fopen("processes.txt", "r");
+    if (input_file == NULL)
+    {
         printf("Failed to open input file\n");
         return 1;
     }
 
-    int n, time_slice;
-    fscanf(input_file, "%d %d", &n, &time_slice);
+    int n = 5, time_slice = 1;
+    // fscanf(input_file, "%d %d", &n, &time_slice);
 
     struct process *processes = malloc(n * sizeof(struct process));
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         fscanf(input_file, "%d %d %d", &processes[i].pid, &processes[i].arrival_time, &processes[i].burst_time);
         processes[i].remaining_time = processes[i].burst_time;
         processes[i].completed = 0;
@@ -218,17 +188,21 @@ int main() {
     int completed = 0;
     int time_slice_remaining = 0;
 
-    while (completed < n) {
+    while (completed < n)
+    {
         int shortest_process_index = -1;
         int shortest_remaining_time = __INT_MAX__;
-        for (int i = 0; i < n; i++) {
-            if (!processes[i].completed && processes[i].arrival_time <= current_time && processes[i].remaining_time < shortest_remaining_time) {
+        for (int i = 0; i < n; i++)
+        {
+            if (!processes[i].completed && processes[i].arrival_time <= current_time && processes[i].remaining_time < shortest_remaining_time)
+            {
                 shortest_process_index = i;
                 shortest_remaining_time = processes[i].remaining_time;
             }
         }
 
-        if (shortest_process_index == -1) {
+        if (shortest_process_index == -1)
+        {
             printf("CPU idle from time %d to %d\n", current_time, current_time + 1);
             current_time++;
             time_slice_remaining = 0;
@@ -237,10 +211,13 @@ int main() {
 
         struct process *p = &processes[shortest_process_index];
 
-        if (p->remaining_time > time_slice) {
+        if (p->remaining_time > time_slice)
+        {
             p->remaining_time -= time_slice;
             time_slice_remaining = time_slice;
-        } else {
+        }
+        else
+        {
             time_slice_remaining = p->remaining_time;
             p->remaining_time = 0;
             p->completed = 1;
@@ -251,8 +228,10 @@ int main() {
             completed++;
         }
 
-        for (int i = 0; i < n; i++) {
-            if (i != shortest_process_index && !processes[i].completed && processes[i].arrival_time <= current_time) {
+        for (int i = 0; i < n; i++)
+        {
+            if (i != shortest_process_index && !processes[i].completed && processes[i].arrival_time <= current_time)
+            {
                 processes[i].waiting_time += time_slice_remaining;
             }
         }
@@ -263,7 +242,8 @@ int main() {
     float total_waiting_time = 0.0;
     float total_turnaround_time = 0.0;
 
-    for (int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         total_waiting_time += processes[i].waiting_time;
         total_turnaround_time += processes[i].turnaround_time;
     }
@@ -271,4 +251,8 @@ int main() {
     float avg_waiting_time = total_waiting_time / n;
     float avg_turnaround_time = total_turnaround_time / n;
 
-    printf("Average
+    printf("The average waiting time is: %d\n", avg_waiting_time);
+    printf("The average turnaround time is: %d\n", avg_turnaround_time);
+    fclose(input_file);
+    return 0;
+}
