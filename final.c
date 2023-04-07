@@ -18,7 +18,10 @@ int main()
     float avg_turnaround_time = 0.0, avg_waiting_time = 0.0;
     int i, j, time = 0, completed = 0, shortest;
     // Open the input file for reading
-    input_file = fopen("proc1.txt", "r");
+    char filename[50];
+    printf("Enter file name: ");
+    scanf("%s", filename);
+    input_file = fopen(filename, "r");
     if (input_file == NULL)
     {
         printf("Error opening input file\n");
