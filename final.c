@@ -57,6 +57,7 @@ int main()
             time++;
         }
         else
+        
         {
             if (processes[shortest].remaining_time <= time_slice)
             {
